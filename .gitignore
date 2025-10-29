@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Personal notes (users can track progress without committing)
+personal-notes.md
+my-journey.md
+
+# Temporary files
+*.tmp
+*.log
+.cache/
+
+# User-specific skill work
+skills/*/personal/
