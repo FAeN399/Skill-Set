@@ -96,7 +96,8 @@ Skill-Set/
 ├── tools/                             # Toolkit scripts
 │   ├── init_skill.py                  # Initialize new skill
 │   ├── package_skill.py               # Package and validate skill
-│   └── quick_validate.py              # Validate skill structure
+│   ├── quick_validate.py              # Validate skill structure
+│   └── check_dependencies.py          # Analyze dependencies & install order
 ├── examples/                          # Example skill chains
 │   └── document-processing/           # Complete example
 │       ├── README.md
@@ -170,6 +171,44 @@ Options:
 ```
 
 Creates a `.skill` file (zip archive) containing the complete skill.
+
+### check_dependencies.py
+
+Analyze skill chain dependencies and determine installation order.
+
+```bash
+python3 tools/check_dependencies.py SKILLS_DIR [--install-order-only] [--check]
+
+Options:
+  --install-order-only    Only show installation order
+  --check                 Check for missing prerequisites
+```
+
+**Example output:**
+```
+SKILL CHAIN DEPENDENCY ANALYSIS
+══════════════════════════════════════════════════════════
+
+🔷 FOUNDATION [00] 00_api-testing-foundation
+    Name: api-testing-foundation
+    Prerequisites: None
+    ↓
+◆ [01] 01_endpoint-testing
+    Name: api-endpoint-testing
+    Prerequisites: 00_api-testing-foundation
+    ↓
+◆ [02] 02_integration-testing
+    Name: api-integration-testing
+    Prerequisites: 00_api-testing-foundation, 01_endpoint-testing
+
+RECOMMENDED INSTALLATION ORDER
+══════════════════════════════════════════════════════════
+1. claude-code install 00_api-testing-foundation.skill  # REQUIRED
+2. claude-code install 01_endpoint-testing.skill  # OPTIONAL
+3. claude-code install 02_integration-testing.skill  # OPTIONAL
+```
+
+Use this tool to help users understand which skills to install and in what order.
 
 ## Creating a Skill Chain
 
@@ -323,7 +362,64 @@ Once packaged, `.skill` files can be:
 - Installed via Claude Code
 - Distributed as a complete chain
 
-Users should install skills in order (foundation first, then dependents).
+### User Control and Installation
+
+**Users have full control** over which skills they install:
+
+#### Installation Order
+
+Skills should be installed in dependency order:
+
+```bash
+# Install foundation first (required by others)
+claude-code install 00_api-testing-foundation.skill
+
+# Then install dependent skills
+claude-code install 01_endpoint-testing.skill
+claude-code install 02_integration-testing.skill
+```
+
+#### Selective Installation
+
+Users can choose their level of functionality:
+
+**Full Chain** (maximum capability):
+```
+Install: Foundation + All dependent skills
+Result: Complete workflow support
+```
+
+**Partial Chain** (selective features):
+```
+Install: Foundation + Only needed skills
+Result: Focused functionality
+Example: Foundation + endpoint-testing (skip integration-testing)
+```
+
+**Foundation Only** (basics):
+```
+Install: Just the foundation skill
+Result: Core concepts and patterns only
+```
+
+#### How Claude Invokes Skills
+
+Once installed, Claude Code automatically selects skills based on:
+1. **Task context** - What the user is asking for
+2. **Skill descriptions** - Matching trigger phrases in YAML frontmatter
+3. **"When to Use" section** - Explicit use cases listed in SKILL.md
+
+Users don't manually invoke skills - Claude chooses the best match based on the request.
+
+#### Prerequisites
+
+If a user installs a dependent skill without its prerequisites:
+- The skill will reference concepts from the missing foundation
+- This may cause confusion
+- **Best practice**: Always install foundation skills first
+
+**For Skill Creators:**
+Document installation order clearly in your skill chain's README.
 
 ## Contributing
 
